@@ -64,8 +64,8 @@ pub const Table = struct {
 
     // Return the item with the matching index from an iterator struct std.mem.SplitIterator(T)
     fn splitIteratorGetIndex(self: Table, comptime T: type, split_iterator: *std.mem.SplitIterator(T, .sequence), target_index: usize) TableError![]const T {
-        if (self.check_quote) {
-            return getColumnItemInQuote(u8, split_iterator, target_index, self.allocator);
+        if (self.settings.check_quote) {
+            return getColumnItemInQuote(u8, split_iterator, target_index, self.allocator, self.arena_allocator.allocator());
         } else {
             var index: usize = 0;
 
@@ -130,12 +130,12 @@ pub const Table = struct {
     }
 
     /// Returns a struct TableIterator containing all rows inside struct Table
-    pub fn getAllRows(self: Table) TableIterator {
+    pub fn getAllRows(self: *Table) TableIterator {
         return TableIterator{
             .delimiter = self.settings.delimiter,
             .header = self.header.items,
             .body = self.body.items,
-            .allocator = self.allocator,
+            .allocator = self.arena_allocator.allocator(),
             .check_quote = self.settings.check_quote,
         };
     }
@@ -178,12 +178,12 @@ pub const Table = struct {
     }
 
     /// Returns a struct ColumnIterator, containing all elements of a given column by its index
-    pub fn getColumnByIndex(self: Table, column_index: usize) ColumnIterator {
+    pub fn getColumnByIndex(self: *Table, column_index: usize) ColumnIterator {
         return ColumnIterator{
             .body = self.body.items,
             .delimiter = self.settings.delimiter,
             .column_index = column_index,
-            .allocator = self.allocator,
+            .allocator = self.arena_allocator.allocator(),
             .check_quote = self.settings.check_quote,
         };
     }
@@ -195,7 +195,7 @@ pub const Table = struct {
         return RowIterator{
             .header = self.header.items,
             .row = std.mem.splitSequence(u8, self.body.items[row_index], self.settings.delimiter),
-            .allocator = self.allocator,
+            .allocator = self.arena_allocator.allocator(),
             .check_quote = self.settings.check_quote,
         };
     }
