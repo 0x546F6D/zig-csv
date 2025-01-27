@@ -202,7 +202,6 @@ pub fn getColumnItemInQuote(comptime T: type, split_iterator: *std.mem.SplitIter
     var item_in_quote: []const u8 = "";
 
     while (split_iterator.next()) |item| {
-        std.debug.print("index: {}, item: {s}\n", .{ index, item });
         if (!in_quote and item.len > 1 and item[0] == '"' and item[item.len - 1] != '"') { // check if item is the beginning of a double quoted value
             in_quote = true;
             if (index == target_index) item_in_quote = item;
